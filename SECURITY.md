@@ -1,4 +1,6 @@
-If you found a security vulnerability, we kindly ask you to report it via GitHub or email.
+If you found a security vulnerability, we kindly ask you to report it via [GitHub] or email.
+
+  [GitHub]: https://github.com/mkw-re/ghidra-panel/security/advisories/new
 
 ```
 EMAIL: security AT mkw DOT re
