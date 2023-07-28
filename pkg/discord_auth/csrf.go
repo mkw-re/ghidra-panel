@@ -79,7 +79,8 @@ func (c *csrfProt) check(x string) bool {
 
 	valid := macValid && !isReused
 	if valid {
-		c.bitmap[idx/64] &^= 1 << (idx % 64)
+		// set bit
+		c.bitmap[idx/64] |= 1 << (idx % 64)
 	}
 	return valid
 }
