@@ -48,18 +48,6 @@ GhidraClient --> GhidraServer
 Panel --> Discord
 ```
 
-## Security
-
-Please report security issues via GitHub or email.
-
-```
-security AT mkw DOT re
-
-TODO GPG key
-```
-
-This project follows [OWASP](https://owasp.org/) guidelines for secure web development and password management. 
-
 ## Philosophy
 
 This software serves a hobbyist community with limited time.
