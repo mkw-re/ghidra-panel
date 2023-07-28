@@ -7,18 +7,24 @@ import (
 	"go.mkw.re/ghidra-panel/pkg/web"
 	"log"
 	"net/http"
+	"os"
 )
 
 func main() {
 	configPath := flag.String("config", "ghidra_panel.json", "path to config file")
 	flag.Parse()
 
+	configJSON, err := os.ReadFile(*configPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	var panelConfig struct {
 		ClientID     string `json:"client_id"`
 		ClientSecret string `json:"client_secret"`
 		BaseURL      string `json:"base_url"`
 	}
-	if err := json.Unmarshal([]byte(*configPath), &panelConfig); err != nil {
+	if err := json.Unmarshal(configJSON, &panelConfig); err != nil {
 		log.Fatal(err)
 	}
 	if panelConfig.ClientID == "" {

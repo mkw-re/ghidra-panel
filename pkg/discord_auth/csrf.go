@@ -9,7 +9,10 @@ import (
 	"encoding/binary"
 	"hash"
 	"strings"
+	"time"
 )
+
+const oauth2Validity = 30 * time.Second
 
 const csrfDepth = 65536
 
@@ -32,9 +35,10 @@ func newCSRFProt() *csrfProt {
 }
 
 func (c *csrfProt) issue() string {
-	// upper 4 bytes: nonce
-	// lower 32 bytes: mac
-	var key [40]byte
+	// 0:32 = hmac key
+	// 32:40 = counter
+	// 40:48 = timestamp
+	var key [48]byte
 
 	// issue new key
 	n := c.n
@@ -42,10 +46,11 @@ func (c *csrfProt) issue() string {
 	// clear bit
 	c.bitmap[idx/64] &^= 1 << (idx % 64)
 	binary.LittleEndian.PutUint64(key[32:40], n)
+	binary.LittleEndian.PutUint64(key[40:48], uint64(time.Now().Unix()))
 
 	// hmac key
 	c.mac.Reset()
-	_, _ = c.mac.Write(key[32:40])
+	_, _ = c.mac.Write(key[32:48])
 	c.mac.Sum(key[:0])
 
 	// wind up for next iteration
@@ -59,16 +64,22 @@ func (c *csrfProt) check(x string) bool {
 	}
 	x = x[3:]
 
-	var key [40]byte
+	var key [48]byte
 	_, err := base64.URLEncoding.Decode(key[:], []byte(x))
 	if err != nil {
+		return false
+	}
+
+	// check if expired
+	timestamp := binary.LittleEndian.Uint64(key[40:48])
+	if time.Now().Unix()-int64(timestamp) > int64(oauth2Validity)/int64(time.Second) {
 		return false
 	}
 
 	// verify hmac key
 	var verify [32]byte
 	c.mac.Reset()
-	_, _ = c.mac.Write(key[32:40])
+	_, _ = c.mac.Write(key[32:48])
 	c.mac.Sum(verify[:0])
 	macValid := subtle.ConstantTimeCompare(key[:32], verify[:]) == 1
 
