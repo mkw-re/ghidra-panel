@@ -14,3 +14,8 @@ integration: ../test.db
  	  -Dexec.mainClass=re.mkw.srejaas.SampleAcn \
  	  -Dexec.classpathScope=test test-compile \
  	  -Djava.security.auth.login.config=test.conf exec:java
+
+.PHONY: clean
+clean:
+	#$(MAVEN) clean
+	rm -rf target

@@ -21,3 +21,8 @@ test.db: srepanel
 .PHONY: integration
 integration:
 	$(MAKE) -C jaas integration
+
+clean:
+	$(MAKE) -C jaas clean
+	#rm -f ghidra_panel.secrets.json
+	rm -f srepanel test.db
