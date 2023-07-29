@@ -10,6 +10,15 @@
       justify-content: space-between;
     }
 
+    article {
+      padding: 0;
+      overflow: hidden;
+    }
+
+    article div {
+      padding: 1rem;
+    }
+
     article div:nth-of-type(1) {
       min-height: 20rem;
       padding: 3rem;
@@ -42,7 +51,7 @@
   </style>
 </head>
 <body>
-{{ template "nav.gohtml" }}
+{{ template "nav.gohtml" . }}
 <main class="container">
   <article>
     <div>

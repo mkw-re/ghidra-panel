@@ -26,7 +26,7 @@ func NewIssuer(secret *[32]byte) Issuer {
 }
 
 type Claims struct {
-	Sub  int64  `json:"sub,string"`
+	Sub  uint64 `json:"sub,string"`
 	Name string `json:"name"`
 	Iat  int64  `json:"iat"`
 }

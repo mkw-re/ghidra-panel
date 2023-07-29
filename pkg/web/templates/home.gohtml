@@ -3,11 +3,63 @@
 <head>
   <title>Home</title>
   {{ template "head.gohtml" }}
+  <style>
+    .password_row {
+      width: 100%;
+      display: flex;
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .password_row > label {
+      flex-grow: 1;
+    }
+
+    form button {
+      width: auto;
+      height: auto;
+    }
+  </style>
 </head>
 <body>
+{{ template "nav.gohtml" . }}
 <main class="container">
-  <h1>mkw.re</h1>
-  <p>Hello, {{ .Username }} (ID: {{ .UserID }})</p>
+  <h1>Hi, {{ .Identity.Username }}!</h1>
+  <article>
+    <header>
+      <strong>Update Ghidra Credentials</strong>
+    </header>
+    <form>
+      <div class="grid">
+        <label for="hostname">
+          Hostname
+          <input id="hostname" type="text" value="{{ .Ghidra.Hostname }}" readonly>
+        </label>
+        <label for="port">
+          Port
+          <input id="port" type="text" value="{{ .Ghidra.Port }}" readonly>
+        </label>
+      </div>
+
+      <label for="username">Username</label>
+      <input id="username" type="text" value="{{ .Identity.Username }}" readonly>
+
+      <div class="password_row">
+        <label for="password">
+          Password
+          <input id="password" type="password" name="password" placeholder="Enter new password..." required>
+          <small>Please do not share your password with anyone else.</small>
+        </label>
+
+        <button role="button" type="submit" class="outline">Update Password</button>
+      </div>
+    </form>
+    {{ if not .UserState.HasPassword }}
+    <p><mark>Your account is missing a Ghidra password. Please set one!</mark></p>
+    {{ end }}
+  </article>
 </main>
 {{ template "footer.gohtml" }}
 </body>

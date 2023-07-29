@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"go.mkw.re/ghidra-panel/pkg/common"
 	"go.mkw.re/ghidra-panel/pkg/database"
 	"go.mkw.re/ghidra-panel/pkg/discord_auth"
 	"go.mkw.re/ghidra-panel/pkg/token"
@@ -11,6 +12,17 @@ import (
 	"net/http"
 	"os"
 )
+
+type Config struct {
+	BaseURL string `json:"base_url"`
+	Discord struct {
+		ClientID     string `json:"client_id"`
+		ClientSecret string `json:"client_secret"`
+	} `json:"discord"`
+	Ghidra struct {
+		Endpoint common.GhidraEndpoint `json:"endpoint"`
+	} `json:"ghidra"`
+}
 
 func main() {
 	configPath := flag.String("config", "ghidra_panel.json", "path to config file")
@@ -25,21 +37,17 @@ func main() {
 		log.Fatal(err)
 	}
 
-	var panelConfig struct {
-		ClientID     string `json:"client_id"`
-		ClientSecret string `json:"client_secret"`
-		BaseURL      string `json:"base_url"`
-	}
-	if err := json.Unmarshal(configJSON, &panelConfig); err != nil {
+	var config Config
+	if err := json.Unmarshal(configJSON, &config); err != nil {
 		log.Fatal(err)
 	}
-	if panelConfig.ClientID == "" {
+	if config.Discord.ClientID == "" {
 		log.Fatal("client_id not set")
 	}
-	if panelConfig.ClientSecret == "" {
+	if config.Discord.ClientSecret == "" {
 		log.Fatal("client_secret not set")
 	}
-	if panelConfig.BaseURL == "" {
+	if config.BaseURL == "" {
 		log.Fatal("base_url not set")
 	}
 
@@ -63,13 +71,16 @@ func main() {
 
 	// Setup web server
 
-	redirectURL := panelConfig.BaseURL + "/redirect"
+	redirectURL := config.BaseURL + "/redirect"
 
-	auth := discord_auth.NewAuth(panelConfig.ClientID, panelConfig.ClientSecret, redirectURL)
+	auth := discord_auth.NewAuth(config.Discord.ClientID, config.Discord.ClientSecret, redirectURL)
 
 	issuer := token.NewIssuer((*[32]byte)(secrets.HMACSecret))
 
-	server, err := web.NewServer(&web.Config{BaseURL: panelConfig.BaseURL}, auth, &issuer)
+	webConfig := web.Config{
+		GhidraEndpoint: &config.Ghidra.Endpoint,
+	}
+	server, err := web.NewServer(&webConfig, db, auth, &issuer)
 	if err != nil {
 		log.Fatal(err)
 	}

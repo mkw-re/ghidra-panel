@@ -86,7 +86,7 @@ func (c *Auth) GetDiscordIdentity(ctx context.Context, token *oauth2.Token) (ide
 
 	var info struct {
 		User struct {
-			ID       int64  `json:"id,string"`
+			ID       uint64 `json:"id,string"`
 			Username string `json:"username"`
 		} `json:"user"`
 	}

@@ -6,15 +6,22 @@ body>main {
   padding: 1rem 0;
 }
 
-article {
-  padding: 0;
-  overflow: hidden;
-}
-
-article div {
-  padding: 1rem;
-}
-
 body>footer {
   padding: 1rem 0;
+}
+
+nav > ul:first-child > li:not(:last-child):after {
+  display: inline-block;
+  width: 0;
+  vertical-align: baseline;
+  content: "/";
+  padding-left: 10px;
+}
+
+.funky-kong {
+  background-image: url("/assets/Funky_Kong.webp");
+  background-position: center;
+  background-size: cover;
+  height: 56px;
+  width: 56px;
 }

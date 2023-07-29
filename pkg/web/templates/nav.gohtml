@@ -5,5 +5,15 @@
         <strong>mkw.re</strong>
       </a>
     </li>
+    {{ range $nav := .Nav }}
+    <li>
+      <a href="{{ $nav.Route }}">{{ $nav.Name }}</a>
+    </li>
+    {{ end }}
   </ul>
+  {{ if .Identity }}
+  <ul>
+    <li><a href="/logout">Logout</a></li>
+  </ul>
+  {{ end }}
 </nav>
