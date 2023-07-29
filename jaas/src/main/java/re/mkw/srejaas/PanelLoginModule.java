@@ -1,5 +1,9 @@
 package re.mkw.srejaas;
 
+import com.sun.security.auth.UserPrincipal;
+import org.bouncycastle.crypto.generators.Argon2BytesGenerator;
+import org.bouncycastle.crypto.params.Argon2Parameters;
+
 import javax.security.auth.Subject;
 import javax.security.auth.callback.Callback;
 import javax.security.auth.callback.CallbackHandler;
@@ -31,12 +35,14 @@ public class PanelLoginModule implements LoginModule {
   private Subject subject;
   private CallbackHandler callbackHandler;
   private Map<String, Object> options;
+  private UserPrincipal user;
   private String username;
   private char[] password;
-  private Connection dbConn;
 
   private byte[] pwSalt;
   private byte[] pwHash;
+  private boolean success;
+  private boolean committed;
 
   @Override
   public void initialize(
@@ -51,43 +57,78 @@ public class PanelLoginModule implements LoginModule {
 
   @Override
   public boolean login() throws LoginException {
-    connectToDatabase();
     getNameAndPassword();
     getPasswordHash();
     verifyPassword();
+    success = true;
+    user = new UserPrincipal(this.username);
     return true;
   }
 
   @Override
   public boolean commit() throws LoginException {
-    return false;
+    if (!success) {
+      return false;
+    }
+    if (!subject.isReadOnly()) {
+      if (!user.implies(subject)) {
+        subject.getPrincipals().add(user);
+      }
+    }
+    committed = true;
+    return true;
   }
 
   @Override
   public boolean abort() throws LoginException {
-    return false;
+    if (!success) {
+      return false;
+    }
+    if (!committed) {
+      success = false;
+      cleanup();
+    } else {
+      logout();
+    }
+    return true;
   }
 
   @Override
   public boolean logout() throws LoginException {
+    if (subject.isReadOnly()) {
+      cleanup();
+      throw new LoginException("Subject is read-only");
+    }
+    subject.getPrincipals().remove(user);
+
+    cleanup();
+    success = false;
+    committed = false;
+
     return false;
+  }
+
+  private void cleanup() {
+    user = null;
+    username = null;
+    if (password != null) {
+      java.util.Arrays.fill(password, '\0');
+      password = null;
+    }
   }
 
   /**
    * Acquires a JDBC connection handle to the URI in options.
    *
-   * @throws LoginException Failed to connect to database.
+   * @throws SQLException Failed to connect to database.
    */
-  private void connectToDatabase() throws LoginException {
+  private Connection connectToDatabase() throws SQLException {
+    // TODO consider caching connection handles
     String jdbc = options.getOrDefault(JDBC_OPTION_NAME, "").toString();
     if (jdbc.isEmpty()) {
-      throw new LoginException("JDBC connection string not provided");
+      throw new SQLException("JDBC connection string not provided");
     }
-    try {
-      this.dbConn = DriverManager.getConnection(jdbc);
-    } catch (SQLException e) {
-      throw new LoginException("Failed to connect to database: " + e.getMessage());
-    }
+    return DriverManager.getConnection(jdbc);
   }
 
   /**
@@ -157,10 +198,15 @@ public class PanelLoginModule implements LoginModule {
    * @throws LoginException Database error, username doesn't exist, or user didn't set password yet.
    */
   private void getPasswordHash() throws LoginException {
+    Connection dbConn = null;
     PreparedStatement stmt = null;
     ResultSet rs = null;
     try {
-      stmt = this.dbConn.prepareStatement("SELECT salt, hash FROM password WHERE username = ?");
+      dbConn = connectToDatabase();
+
+      stmt =
+          dbConn.prepareStatement(
+              "SELECT salt, hash FROM password WHERE username = ? AND format = 1");
       stmt.setString(1, this.username);
 
       rs = stmt.executeQuery();
@@ -186,7 +232,35 @@ public class PanelLoginModule implements LoginModule {
         } catch (SQLException ignored) {
         }
       }
+      if (dbConn != null) {
+        try {
+          dbConn.close();
+        } catch (SQLException ignored) {
+        }
+      }
     }
+  }
+
+  /**
+   * Hash password provided by client.
+   *
+   * @return Argon2id hash of password.
+   */
+  private byte[] hashGivenPassword() {
+    Argon2Parameters params =
+        new Argon2Parameters.Builder(Argon2Parameters.ARGON2_id)
+            .withIterations(1)
+            .withMemoryAsKB(19456)
+            .withParallelism(2)
+            .withSalt(this.pwSalt)
+            .build();
+
+    Argon2BytesGenerator generator = new Argon2BytesGenerator();
+    generator.init(params);
+
+    byte[] actualHash = new byte[32];
+    generator.generateBytes(this.password, actualHash);
+    return actualHash;
   }
 
   /**
@@ -195,6 +269,11 @@ public class PanelLoginModule implements LoginModule {
    * @throws LoginException Wrong password
    */
   private void verifyPassword() throws LoginException {
-    throw new LoginException("TODO!");
+    byte[] actualHash = hashGivenPassword();
+    /* Constant-time compare */
+    boolean correct = org.bouncycastle.util.Arrays.constantTimeAreEqual(this.pwHash, actualHash);
+    if (!correct) {
+      throw new LoginException("Wrong password");
+    }
   }
 }

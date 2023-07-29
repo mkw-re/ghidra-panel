@@ -6,6 +6,7 @@
     <groupId>re.mkw</groupId>
     <artifactId>ghidra-panel-jaas</artifactId>
     <version>0.1.0</version>
+
     <build>
         <plugins>
             <plugin>
@@ -18,4 +19,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <dependencies>
+        <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+        <dependency>
+            <groupId>org.bouncycastle</groupId>
+            <artifactId>bcprov-jdk15on</artifactId>
+            <version>1.69</version>
+        </dependency>
+    </dependencies>
 </project>
