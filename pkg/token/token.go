@@ -6,6 +6,7 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
+	"go.mkw.re/ghidra-panel/pkg/common"
 	"strings"
 	"time"
 )
@@ -25,8 +26,9 @@ func NewIssuer(secret *[32]byte) Issuer {
 }
 
 type Claims struct {
-	Sub string `json:"sub"`
-	Iat int64  `json:"iat"`
+	Sub  int64  `json:"sub,string"`
+	Name string `json:"name"`
+	Iat  int64  `json:"iat"`
 }
 
 func (c *Claims) String() string {
@@ -37,10 +39,11 @@ func (c *Claims) String() string {
 	return base64.RawURLEncoding.EncodeToString(buf)
 }
 
-func (iss Issuer) Issue(user string) string {
+func (iss Issuer) Issue(ident *common.Identity) string {
 	claims := &Claims{
-		Sub: user,
-		Iat: time.Now().Unix(),
+		Sub:  ident.ID,
+		Name: ident.Username,
+		Iat:  time.Now().Unix(),
 	}
 	body := jwtPrefix + claims.String()
 	return body + "." + iss.sign(body)
@@ -55,16 +58,16 @@ func (iss Issuer) sign(payload string) string {
 	return base64.RawURLEncoding.EncodeToString(sig[:])
 }
 
-func (iss Issuer) Verify(jwt string) (username string, ok bool) {
+func (iss Issuer) Verify(jwt string) (ident *common.Identity, ok bool) {
 	// Laziness
 	if !strings.HasPrefix(jwt, jwtPrefix) {
-		return "", false
+		return nil, false
 	}
 
 	// Find signature
 	sigSep := strings.LastIndex(jwt, ".")
 	if sigSep == -1 {
-		return "", false
+		return nil, false
 	}
 	sigB64 := jwt[sigSep+1:]
 
@@ -72,7 +75,7 @@ func (iss Issuer) Verify(jwt string) (username string, ok bool) {
 	var sig [32]byte
 	_, err := base64.RawURLEncoding.Decode(sig[:], []byte(sigB64))
 	if err != nil {
-		return "", false
+		return nil, false
 	}
 
 	// Verify signature
@@ -82,24 +85,28 @@ func (iss Issuer) Verify(jwt string) (username string, ok bool) {
 	mac.Sum(sig2[:0])
 	macValid := subtle.ConstantTimeCompare(sig[:], sig2[:]) == 1
 	if !macValid {
-		return "", false
+		return nil, false
 	}
 
 	// Decode claims
 	claimsB64 := jwt[len(jwtPrefix):sigSep]
 	claimsBuf, err := base64.RawURLEncoding.DecodeString(claimsB64)
 	if err != nil {
-		return "", false
+		return nil, false
 	}
 	var claims Claims
 	if err = json.Unmarshal(claimsBuf, &claims); err != nil {
-		return "", false
+		return nil, false
 	}
 
 	// Check expiry
 	if time.Now().Unix()-claims.Iat > int64(jwtValidity)/int64(time.Second) {
-		return "", false
+		return nil, false
 	}
 
-	return claims.Sub, true
+	// Reconstruct identity
+	return &common.Identity{
+		ID:       claims.Sub,
+		Username: claims.Name,
+	}, true
 }

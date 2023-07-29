@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"go.mkw.re/ghidra-panel/pkg/common"
 	"go.mkw.re/ghidra-panel/pkg/discord_auth"
 	"go.mkw.re/ghidra-panel/pkg/token"
 	"html/template"
@@ -55,16 +56,18 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 }
 
 func (s *Server) handleHome(wr http.ResponseWriter, req *http.Request) {
-	username, ok := s.checkAuth(req)
+	ident, ok := s.checkAuth(req)
 	if !ok {
 		http.Redirect(wr, req, "/login", http.StatusTemporaryRedirect)
 		return
 	}
 
 	homePage.Execute(wr, struct {
+		UserID   int64
 		Username string
 	}{
-		Username: username,
+		UserID:   ident.ID,
+		Username: ident.Username,
 	})
 }
 
@@ -84,21 +87,21 @@ func (s *Server) handleLogin(wr http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) handleOAuthRedirect(wr http.ResponseWriter, req *http.Request) {
-	username, err := s.Auth.HandleRedirect(req)
+	ident, err := s.Auth.HandleRedirect(req)
 	if err != nil {
 		log.Print(err.Error())
 		http.Error(wr, "auth failed", http.StatusUnauthorized)
 		return
 	}
 
-	wr.Header().Set("Set-Cookie", "token="+s.Issuer.Issue(username)+"; Path=/; HttpOnly; Secure")
+	wr.Header().Set("Set-Cookie", "token="+s.Issuer.Issue(ident)+"; Path=/; HttpOnly; Secure")
 	http.Redirect(wr, req, "/", http.StatusTemporaryRedirect)
 }
 
-func (s *Server) checkAuth(req *http.Request) (string, bool) {
+func (s *Server) checkAuth(req *http.Request) (*common.Identity, bool) {
 	cookie, err := req.Cookie("token")
 	if err != nil || cookie == nil {
-		return "", false
+		return nil, false
 	}
 	return s.Issuer.Verify(cookie.Value)
 }

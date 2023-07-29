@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"go.mkw.re/ghidra-panel/pkg/common"
 	"go.mkw.re/ghidra-panel/pkg/csrf"
 	"golang.org/x/oauth2"
 	"net/http"
@@ -38,7 +39,7 @@ func (c *Auth) AuthURL() string {
 	return c.Config.AuthCodeURL(c.prot.Issue(), oauth2.AccessTypeOnline)
 }
 
-func (c *Auth) HandleRedirect(req *http.Request) (username string, err error) {
+func (c *Auth) HandleRedirect(req *http.Request) (ident *common.Identity, err error) {
 	ctx := req.Context()
 
 	query := req.URL.Query()
@@ -46,42 +47,45 @@ func (c *Auth) HandleRedirect(req *http.Request) (username string, err error) {
 	state := query.Get("state")
 
 	if !c.prot.Check(state) {
-		return "", errors.New("invalid state")
+		return nil, errors.New("invalid state")
 	}
 
 	token, err := c.Config.Exchange(ctx, code)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	return c.GetDiscordUsername(ctx, token)
 }
 
-func (c *Auth) GetDiscordUsername(ctx context.Context, token *oauth2.Token) (username string, err error) {
+func (c *Auth) GetDiscordUsername(ctx context.Context, token *oauth2.Token) (ident *common.Identity, err error) {
 	meReq, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://discord.com/api/oauth2/@me", nil)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 
 	res, err := c.Config.Client(ctx, token).Do(meReq)
 	if err != nil {
-		return "", err
+		return nil, err
 	}
 	defer res.Body.Close()
 
 	var info struct {
 		User struct {
+			ID       int64  `json:"id,string"`
 			Username string `json:"username"`
 		} `json:"user"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&info); err != nil {
-		return "", err
+		return nil, err
 	}
 
-	username = info.User.Username
-	if username == "" {
-		return "", errors.New("empty username")
+	if info.User.ID == 0 || info.User.Username == "" {
+		return nil, errors.New("invalid response")
 	}
 
-	return username, nil
+	return &common.Identity{
+		ID:       info.User.ID,
+		Username: info.User.Username,
+	}, nil
 }
