@@ -65,6 +65,8 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/redirect", s.handleOAuthRedirect)
 	mux.HandleFunc("/logout", s.handleLogout)
 
+	mux.HandleFunc("/update_password", s.handleUpdatePassword)
+
 	// Create file server for assets
 	mux.Handle("/assets/", http.FileServer(http.FS(assets)))
 }
