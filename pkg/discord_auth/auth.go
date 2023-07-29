@@ -39,26 +39,40 @@ func (c *Auth) AuthURL() string {
 	return c.Config.AuthCodeURL(c.prot.Issue(), oauth2.AccessTypeOnline)
 }
 
+// HandleRedirect handles an OAuth2 redirect from the identity provider.
 func (c *Auth) HandleRedirect(req *http.Request) (ident *common.Identity, err error) {
 	ctx := req.Context()
+
+	// TODO error handling
 
 	query := req.URL.Query()
 	code := query.Get("code")
 	state := query.Get("state")
 
-	if !c.prot.Check(state) {
-		return nil, errors.New("invalid state")
+	// Check CSRF token validity -- do not consume yet
+	csrfID, err := c.prot.Check(state)
+	if err != nil {
+		return nil, err
 	}
 
+	// Request authorization token from Discord
 	token, err := c.Config.Exchange(ctx, code)
 	if err != nil {
 		return nil, err
 	}
 
-	return c.GetDiscordUsername(ctx, token)
+	// Ask Discord for user ID/username associated with token
+	ident, err = c.GetDiscordIdentity(ctx, token)
+	if err != nil {
+		return nil, err
+	}
+
+	// Prevent CSRF token reuse
+	err = c.prot.Consume(csrfID)
+	return
 }
 
-func (c *Auth) GetDiscordUsername(ctx context.Context, token *oauth2.Token) (ident *common.Identity, err error) {
+func (c *Auth) GetDiscordIdentity(ctx context.Context, token *oauth2.Token) (ident *common.Identity, err error) {
 	meReq, err := http.NewRequestWithContext(ctx, http.MethodGet, "https://discord.com/api/oauth2/@me", nil)
 	if err != nil {
 		return nil, err
