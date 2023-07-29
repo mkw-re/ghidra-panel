@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"go.mkw.re/ghidra-panel/pkg/csrf"
 	"golang.org/x/oauth2"
 	"net/http"
 )
@@ -16,7 +17,7 @@ var Endpoint = oauth2.Endpoint{
 
 type Auth struct {
 	oauth2.Config
-	prot *csrfProt
+	prot *csrf.OneTime
 }
 
 func NewAuth(clientID, clientSecret, redirectURL string) *Auth {
@@ -28,13 +29,13 @@ func NewAuth(clientID, clientSecret, redirectURL string) *Auth {
 			RedirectURL:  redirectURL,
 			Scopes:       []string{"identify"},
 		},
-		prot: newCSRFProt(),
+		prot: csrf.NewOneTime(),
 	}
 	return config
 }
 
 func (c *Auth) AuthURL() string {
-	return c.Config.AuthCodeURL(c.prot.issue(), oauth2.AccessTypeOnline)
+	return c.Config.AuthCodeURL(c.prot.Issue(), oauth2.AccessTypeOnline)
 }
 
 func (c *Auth) HandleRedirect(req *http.Request) (username string, err error) {
@@ -44,7 +45,7 @@ func (c *Auth) HandleRedirect(req *http.Request) (username string, err error) {
 	code := query.Get("code")
 	state := query.Get("state")
 
-	if !c.prot.check(state) {
+	if !c.prot.Check(state) {
 		return "", errors.New("invalid state")
 	}
 

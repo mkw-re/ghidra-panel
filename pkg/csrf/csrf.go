@@ -1,4 +1,4 @@
-package discord_auth
+package csrf
 
 import (
 	"crypto/hmac"
@@ -12,18 +12,17 @@ import (
 	"time"
 )
 
-const oauth2Validity = 30 * time.Second
+const csrfValidity = 30 * time.Second
 
 const csrfDepth = 65536
 
-// csrfProt is a rolling log of previously used state values.
-type csrfProt struct {
+type OneTime struct {
 	ring   bitring.BitRing
 	macKey [32]byte
 }
 
-func newCSRFProt() *csrfProt {
-	c := &csrfProt{
+func NewOneTime() *OneTime {
+	c := &OneTime{
 		ring: bitring.NewBitRing(csrfDepth),
 	}
 	if _, randErr := crand.Read(c.macKey[:]); randErr != nil {
@@ -32,7 +31,7 @@ func newCSRFProt() *csrfProt {
 	return c
 }
 
-func (c *csrfProt) issue() string {
+func (c *OneTime) Issue() string {
 	// 0:32 = hmac key
 	// 32:40 = counter
 	// 40:48 = timestamp
@@ -51,7 +50,7 @@ func (c *csrfProt) issue() string {
 	return "v0:" + base64.URLEncoding.EncodeToString(key[:])
 }
 
-func (c *csrfProt) check(x string) bool {
+func (c *OneTime) Check(x string) bool {
 	if !strings.HasPrefix(x, "v0:") {
 		return false
 	}
@@ -65,7 +64,7 @@ func (c *csrfProt) check(x string) bool {
 
 	// check if expired
 	timestamp := binary.LittleEndian.Uint64(key[40:48])
-	if time.Now().Unix()-int64(timestamp) > int64(oauth2Validity)/int64(time.Second) {
+	if time.Now().Unix()-int64(timestamp) > int64(csrfValidity)/int64(time.Second) {
 		return false
 	}
 
