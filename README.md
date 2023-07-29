@@ -7,6 +7,8 @@ The Ghidra community panel assists with collaborative reverse engineering.  It f
 
 This repository is not an official Ghidra project.
 
+![Sign In Page](./.github/img/sign_in.png)
+
 ## Design
 
 `ghidra-panel` introduces the following components:
