@@ -45,8 +45,8 @@ import javax.security.auth.callback.*;
 import javax.security.auth.login.*;
 
 /**
- * <p> This Sample application attempts to authenticate a user
- * and reports whether the authentication was successful.
+ * This Sample application attempts to authenticate a user and reports whether the authentication
+ * was successful.
  */
 public class SampleAcn {
 
@@ -55,7 +55,7 @@ public class SampleAcn {
    *
    * <p>
    *
-   * @param args input arguments for this application.  These are ignored.
+   * @param args input arguments for this application. These are ignored.
    */
   public static void main(String[] args) {
 
@@ -67,8 +67,7 @@ public class SampleAcn {
     try {
       lc = new LoginContext("Sample", new MyCallbackHandler());
     } catch (LoginException | SecurityException le) {
-      System.err.println("Cannot create LoginContext. "
-          + le.getMessage());
+      System.err.println("Cannot create LoginContext. " + le.getMessage());
       System.exit(-1);
     }
 
@@ -92,7 +91,6 @@ public class SampleAcn {
         } catch (Exception e) {
           // ignore
         }
-
       }
     }
 
@@ -103,17 +101,15 @@ public class SampleAcn {
     }
 
     System.out.println("Authentication succeeded!");
-
   }
 }
-
 
 /**
  * The application implements the CallbackHandler.
  *
- * <p> This application is text-based.  Therefore it displays information
- * to the user using the OutputStreams System.out and System.err,
- * and gathers input from the user using the InputStream System.in.
+ * <p>This application is text-based. Therefore it displays information to the user using the
+ * OutputStreams System.out and System.err, and gathers input from the user using the InputStream
+ * System.in.
  */
 class MyCallbackHandler implements CallbackHandler {
 
@@ -122,18 +118,14 @@ class MyCallbackHandler implements CallbackHandler {
    *
    * <p>
    *
-   * @param callbacks an array of <code>Callback</code> objects which contain
-   *                  the information requested by an underlying security
-   *                  service to be retrieved or displayed.
-   *
-   * @exception java.io.IOException if an input or output error occurs. <p>
-   *
-   * @exception UnsupportedCallbackException if the implementation of this
-   *                  method does not support one or more of the Callbacks
-   *                  specified in the <code>callbacks</code> parameter.
+   * @param callbacks an array of <code>Callback</code> objects which contain the information
+   *     requested by an underlying security service to be retrieved or displayed.
+   * @exception java.io.IOException if an input or output error occurs.
+   *     <p>
+   * @exception UnsupportedCallbackException if the implementation of this method does not support
+   *     one or more of the Callbacks specified in the <code>callbacks</code> parameter.
    */
-  public void handle(Callback[] callbacks)
-      throws IOException, UnsupportedCallbackException {
+  public void handle(Callback[] callbacks) throws IOException, UnsupportedCallbackException {
 
     for (Callback callback : callbacks) {
       if (callback instanceof TextOutputCallback) {
@@ -151,33 +143,39 @@ class MyCallbackHandler implements CallbackHandler {
             System.out.println("WARNING: " + toc.getMessage());
             break;
           default:
-            throw new IOException("Unsupported message type: " +
-                toc.getMessageType());
+            throw new IOException("Unsupported message type: " + toc.getMessageType());
         }
 
       } else if (callback instanceof NameCallback) {
 
-        // prompt the user for a username
+        String envName = System.getenv("SAMPLE_USER");
         NameCallback nc = (NameCallback) callback;
-
-        System.err.print(nc.getPrompt());
-        System.err.print(": ");
-        System.err.flush();
-        nc.setName((new BufferedReader
-            (new InputStreamReader(System.in))).readLine());
+        if (envName != null && !envName.isEmpty()) {
+          nc.setName(envName);
+        } else {
+          // prompt the user for a username
+          System.err.print(nc.getPrompt());
+          System.err.print(": ");
+          System.err.flush();
+          nc.setName((new BufferedReader(new InputStreamReader(System.in))).readLine());
+        }
 
       } else if (callback instanceof PasswordCallback) {
 
-        // prompt the user for sensitive information
+        String envPass = System.getenv("SAMPLE_PASS");
         PasswordCallback pc = (PasswordCallback) callback;
-        System.err.print(pc.getPrompt());
-        System.err.print(": ");
-        System.err.flush();
-        pc.setPassword(readPassword(System.in));
+        if (envPass != null && !envPass.isEmpty()) {
+          pc.setPassword(envPass.toCharArray());
+        } else {
+          // prompt the user for sensitive information
+          System.err.print(pc.getPrompt());
+          System.err.print(": ");
+          System.err.flush();
+          pc.setPassword(readPassword(System.in));
+        }
 
       } else {
-        throw new UnsupportedCallbackException
-            (callback, "Unrecognized Callback");
+        throw new UnsupportedCallbackException(callback, "Unrecognized Callback");
       }
     }
   }
@@ -195,7 +193,8 @@ class MyCallbackHandler implements CallbackHandler {
     int offset = 0;
     int c;
 
-    loop:   while (true) {
+    loop:
+    while (true) {
       switch (c = in.read()) {
         case -1:
         case '\n':
@@ -207,9 +206,8 @@ class MyCallbackHandler implements CallbackHandler {
             if (!(in instanceof PushbackInputStream)) {
               in = new PushbackInputStream(in);
             }
-            ((PushbackInputStream)in).unread(c2);
-          } else
-            break loop;
+            ((PushbackInputStream) in).unread(c2);
+          } else break loop;
 
         default:
           if (--room < 0) {

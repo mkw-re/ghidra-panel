@@ -206,7 +206,7 @@ public class PanelLoginModule implements LoginModule {
 
       stmt =
           dbConn.prepareStatement(
-              "SELECT salt, hash FROM password WHERE username = ? AND format = 1");
+              "SELECT salt, hash FROM passwords WHERE username = ? AND format = 1");
       stmt.setString(1, this.username);
 
       rs = stmt.executeQuery();
