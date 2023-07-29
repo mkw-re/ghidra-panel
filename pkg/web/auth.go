@@ -32,10 +32,13 @@ func (s *Server) handleLogin(wr http.ResponseWriter, req *http.Request) {
 }
 
 func (s *Server) handleOAuthRedirect(wr http.ResponseWriter, req *http.Request) {
-	ident, err := s.Auth.HandleRedirect(req)
+	ident, err := s.Auth.HandleRedirect(wr, req)
 	if err != nil {
 		log.Print("redirect request failed: ", err)
 		http.Error(wr, "auth failed", http.StatusUnauthorized)
+		return
+	}
+	if ident == nil {
 		return
 	}
 

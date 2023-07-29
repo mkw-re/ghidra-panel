@@ -40,10 +40,19 @@ func (c *Auth) AuthURL() string {
 }
 
 // HandleRedirect handles an OAuth2 redirect from the identity provider.
-func (c *Auth) HandleRedirect(req *http.Request) (ident *common.Identity, err error) {
+func (c *Auth) HandleRedirect(wr http.ResponseWriter, req *http.Request) (ident *common.Identity, err error) {
 	ctx := req.Context()
 
-	// TODO error handling
+	errID := req.FormValue("error")
+	errDescription := req.FormValue("error_description")
+	if errID != "" {
+		if errID == "access_denied" {
+			http.Redirect(wr, req, "/login", http.StatusTemporaryRedirect)
+			return nil, nil
+		}
+		http.Error(wr, errDescription, http.StatusUnauthorized)
+		return nil, nil
+	}
 
 	query := req.URL.Query()
 	code := query.Get("code")
