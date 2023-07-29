@@ -1,2 +1,3 @@
 ghidra_panel.json
 ghidra_panel.secrets.json
+*.db*

@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"go.mkw.re/ghidra-panel/pkg/database"
 	"go.mkw.re/ghidra-panel/pkg/discord_auth"
 	"go.mkw.re/ghidra-panel/pkg/token"
 	"go.mkw.re/ghidra-panel/pkg/web"
@@ -14,6 +15,7 @@ import (
 func main() {
 	configPath := flag.String("config", "ghidra_panel.json", "path to config file")
 	secretsPath := flag.String("secrets", "ghidra_panel.secrets.json", "path to secrets file")
+	dbPath := flag.String("db", "ghidra_panel.db", "path to database file")
 	flag.Parse()
 
 	// Read config
@@ -50,6 +52,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Open database
+
+	db, err := database.Open(*dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer db.Close()
+
+	// Setup web server
 
 	redirectURL := panelConfig.BaseURL + "/redirect"
 
