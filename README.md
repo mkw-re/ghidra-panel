@@ -58,7 +58,6 @@ database servers, auth servers, etc. Any such software would require
 continuous updating.
 
 This further means:
-- Minimal external dependencies (no externally hosted databases)
 - No fancy IdP or access controls
   - [Keycloak](https://www.keycloak.org/) looked promising, but
     its JAAS adapter is [deprecated](https://www.keycloak.org/docs/22.0.1/securing_apps/#keycloak-java-adapters)

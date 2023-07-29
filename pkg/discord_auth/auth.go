@@ -3,13 +3,13 @@ package discord_auth
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"golang.org/x/oauth2"
-	"log"
 	"net/http"
 )
 
 var Endpoint = oauth2.Endpoint{
-	AuthURL:   "https://discord.com/api/oauth2/authorize",
+	AuthURL:   "https://discord.com/oauth2/authorize",
 	TokenURL:  "https://discord.com/api/oauth2/token",
 	AuthStyle: oauth2.AuthStyleInParams,
 }
@@ -33,11 +33,11 @@ func NewAuth(clientID, clientSecret, redirectURL string) *Auth {
 	return config
 }
 
-func (c *Auth) LoginURL() string {
+func (c *Auth) AuthURL() string {
 	return c.Config.AuthCodeURL(c.prot.issue(), oauth2.AccessTypeOnline)
 }
 
-func (c *Auth) Redirect(wr http.ResponseWriter, req *http.Request) {
+func (c *Auth) HandleRedirect(req *http.Request) (username string, err error) {
 	ctx := req.Context()
 
 	query := req.URL.Query()
@@ -45,26 +45,15 @@ func (c *Auth) Redirect(wr http.ResponseWriter, req *http.Request) {
 	state := query.Get("state")
 
 	if !c.prot.check(state) {
-		http.Error(wr, "invalid state", http.StatusForbidden)
-		return
+		return "", errors.New("invalid state")
 	}
 
 	token, err := c.Config.Exchange(ctx, code)
 	if err != nil {
-		log.Print("oauth2 exchange failed: " + err.Error())
-		http.Error(wr, "OAuth2 failed", http.StatusInternalServerError)
-		return
+		return "", err
 	}
 
-	username, err := c.GetDiscordUsername(ctx, token)
-	if err != nil {
-		log.Print("get discord username failed: " + err.Error())
-		http.Error(wr, "OAuth2 failed", http.StatusInternalServerError)
-		return
-	}
-
-	wr.Header().Set("Content-Type", "text/html")
-	wr.Write([]byte("<html><body>Logged in as " + username + "</body></html>"))
+	return c.GetDiscordUsername(ctx, token)
 }
 
 func (c *Auth) GetDiscordUsername(ctx context.Context, token *oauth2.Token) (username string, err error) {
@@ -88,5 +77,10 @@ func (c *Auth) GetDiscordUsername(ctx context.Context, token *oauth2.Token) (use
 		return "", err
 	}
 
-	return info.User.Username, nil
+	username = info.User.Username
+	if username == "" {
+		return "", errors.New("empty username")
+	}
+
+	return username, nil
 }

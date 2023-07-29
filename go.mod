@@ -1,6 +1,6 @@
 module go.mkw.re/ghidra-panel
 
-go 1.20
+go 1.18
 
 require golang.org/x/oauth2 v0.10.0
 
