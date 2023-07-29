@@ -94,7 +94,13 @@ func (s *Server) stateWithNav(nav ...Nav) *State {
 func (s *Server) authenticateState(wr http.ResponseWriter, req *http.Request, state *State) bool {
 	ident, ok := s.checkAuth(req)
 	if !ok {
-		http.Error(wr, "not authenticated", http.StatusUnauthorized)
+		http.SetCookie(wr, &http.Cookie{
+			Name:   "token",
+			Value:  "",
+			Path:   "/",
+			MaxAge: -1,
+		})
+		http.Redirect(wr, req, "/login", http.StatusTemporaryRedirect)
 		return false
 	}
 

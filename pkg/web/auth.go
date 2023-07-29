@@ -39,7 +39,13 @@ func (s *Server) handleOAuthRedirect(wr http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	wr.Header().Set("Set-Cookie", "token="+s.Issuer.Issue(ident)+"; Path=/; HttpOnly; Secure")
+	http.SetCookie(wr, &http.Cookie{
+		Name:     "token",
+		Value:    s.Issuer.Issue(ident),
+		Path:     "/",
+		HttpOnly: true,
+		Secure:   true,
+	})
 	http.Redirect(wr, req, "/", http.StatusTemporaryRedirect)
 }
 
