@@ -72,6 +72,6 @@ This further means:
 This panel currently powers [mkw.re](https://mkw.re), a shared space for Mario Kart Wii modding communities.
 Thank you to the countless contributors that have checked in research to the existing Ghidra repos!
 
-Special thank you for [@stblr](github.com/stblr) for his efforts to unite the MKW community and donating the `mkw.re` domain.
+Special thank you for [@stblr](https://github.com/stblr) for his efforts to unite the MKW community and donating the `mkw.re` domain.
 
 Thank you to the SQLite project for making my life easier.
