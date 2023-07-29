@@ -15,18 +15,11 @@ func (s *Server) handleLogin(wr http.ResponseWriter, req *http.Request) {
 
 	switch req.Method {
 	case http.MethodGet:
-		err := loginPage.Execute(wr, State{
-			Nav: []Nav{
-				{
-					Route: "/",
-					Name:  "Ghidra",
-				},
-				{
-					Route: "/login",
-					Name:  "Login",
-				},
-			},
-		})
+		state := s.stateWithNav(
+			Nav{Route: "/", Name: "Ghidra"},
+			Nav{Route: "/login", Name: "Login"},
+		)
+		err := loginPage.Execute(wr, state)
 		if err != nil {
 			panic(err)
 		}

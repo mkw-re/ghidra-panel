@@ -13,3 +13,8 @@ type GhidraEndpoint struct {
 type UserState struct {
 	HasPassword bool
 }
+
+type Link struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}

@@ -22,6 +22,7 @@ type Config struct {
 	Ghidra struct {
 		Endpoint common.GhidraEndpoint `json:"endpoint"`
 	} `json:"ghidra"`
+	Links []common.Link `json:"links"`
 }
 
 func main() {
@@ -79,6 +80,7 @@ func main() {
 
 	webConfig := web.Config{
 		GhidraEndpoint: &config.Ghidra.Endpoint,
+		Links:          config.Links,
 	}
 	server, err := web.NewServer(&webConfig, db, auth, &issuer)
 	if err != nil {

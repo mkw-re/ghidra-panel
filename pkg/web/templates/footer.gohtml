@@ -1,7 +1,7 @@
 <footer class="container-fluid">
-  <small>
-    <a href="https://github.com/mkw-re/ghidra-panel" class="secondary">
-      Source code
-    </a>
-  </small>
+  <aside>
+    {{ range $link := .Links }}
+    <a href="{{ $link.URL }}" class="secondary">{{ $link.Name }}</a>
+    {{ end }}
+  </aside>
 </footer>

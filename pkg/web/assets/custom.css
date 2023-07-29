@@ -1,4 +1,4 @@
-body>main {
+body > main {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -6,8 +6,12 @@ body>main {
   padding: 1rem 0;
 }
 
-body>footer {
+body > footer {
   padding: 1rem 0;
+}
+
+footer > aside > a {
+  margin-right: 0.33em;
 }
 
 nav > ul:first-child > li:not(:last-child):after {

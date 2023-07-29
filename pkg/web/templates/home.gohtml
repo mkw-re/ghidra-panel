@@ -57,10 +57,10 @@
       </div>
     </form>
     {{ if not .UserState.HasPassword }}
-    <p><mark>Your account is missing a Ghidra password. Please set one!</mark></p>
+    <p><mark>Your account does not have a Ghidra password. Please set one!</mark></p>
     {{ end }}
   </article>
 </main>
-{{ template "footer.gohtml" }}
+{{ template "footer.gohtml" . }}
 </body>
 </html>

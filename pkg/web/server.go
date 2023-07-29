@@ -34,6 +34,7 @@ func init() {
 
 type Config struct {
 	GhidraEndpoint *common.GhidraEndpoint
+	Links          []common.Link
 }
 
 type Server struct {
@@ -72,7 +73,8 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 type State struct {
 	Identity  *common.Identity // current user, null if unauthenticated
 	UserState *common.UserState
-	Nav       []Nav // navigation bar
+	Nav       []Nav         // navigation bar
+	Links     []common.Link // footer links
 	Ghidra    *common.GhidraEndpoint
 }
 
@@ -85,6 +87,7 @@ func (s *Server) stateWithNav(nav ...Nav) *State {
 	return &State{
 		Ghidra: s.Config.GhidraEndpoint,
 		Nav:    nav,
+		Links:  s.Config.Links,
 	}
 }
 
