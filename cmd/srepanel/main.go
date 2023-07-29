@@ -29,6 +29,7 @@ func main() {
 	configPath := flag.String("config", "ghidra_panel.json", "path to config file")
 	secretsPath := flag.String("secrets", "ghidra_panel.secrets.json", "path to secrets file")
 	dbPath := flag.String("db", "ghidra_panel.db", "path to database file")
+	listen := flag.String("listen", ":8080", "listen address")
 	flag.Parse()
 
 	// Read config
@@ -90,5 +91,5 @@ func main() {
 	mux := http.NewServeMux()
 	server.RegisterRoutes(mux)
 
-	log.Fatal(http.ListenAndServe("localhost:8080", mux))
+	log.Fatal(http.ListenAndServe(*listen, mux))
 }
