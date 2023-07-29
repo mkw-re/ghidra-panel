@@ -2,7 +2,6 @@
 package bitring
 
 import (
-	"fmt"
 	"math/bits"
 	"sync/atomic"
 )
@@ -64,7 +63,6 @@ func (r *BitRing) Insert(n uint64) (exist, ok bool) {
 		if atomic.CompareAndSwapUint64(&r.v[idx/64], vOld, vNew) {
 			break
 		}
-		fmt.Println("CAS failed")
 	}
 	return (vOld & (1 << (idx % 64))) != 0, true
 }
