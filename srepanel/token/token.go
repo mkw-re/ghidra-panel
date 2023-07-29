@@ -6,13 +6,15 @@ import (
 	"crypto/subtle"
 	"encoding/base64"
 	"encoding/json"
-	"go.mkw.re/ghidra-panel/pkg/common"
 	"strings"
 	"time"
+
+	"go.mkw.re/ghidra-panel/common"
 )
 
 // TODO Integrate BitRing for token expiry
 
+// jwtPrefix is the JWT header of type HS256
 const jwtPrefix = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9."
 
 const jwtValidity = 90 * 24 * time.Hour

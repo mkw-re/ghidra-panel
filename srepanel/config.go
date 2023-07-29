@@ -1,8 +1,9 @@
 package main
 
 import (
-	"go.mkw.re/ghidra-panel/pkg/common"
 	"log"
+
+	"go.mkw.re/ghidra-panel/common"
 )
 
 type config struct {

@@ -2,12 +2,13 @@ package web
 
 import (
 	"embed"
-	"go.mkw.re/ghidra-panel/pkg/common"
-	"go.mkw.re/ghidra-panel/pkg/database"
-	"go.mkw.re/ghidra-panel/pkg/discord_auth"
-	"go.mkw.re/ghidra-panel/pkg/token"
 	"html/template"
 	"net/http"
+
+	"go.mkw.re/ghidra-panel/common"
+	"go.mkw.re/ghidra-panel/database"
+	"go.mkw.re/ghidra-panel/discord_auth"
+	"go.mkw.re/ghidra-panel/token"
 )
 
 var (

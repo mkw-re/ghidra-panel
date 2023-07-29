@@ -4,10 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
-	"go.mkw.re/ghidra-panel/pkg/common"
-	"go.mkw.re/ghidra-panel/pkg/csrf"
 	"golang.org/x/oauth2"
 	"net/http"
+
+	"go.mkw.re/ghidra-panel/common"
+	"go.mkw.re/ghidra-panel/csrf"
 )
 
 var Endpoint = oauth2.Endpoint{

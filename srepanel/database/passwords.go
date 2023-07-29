@@ -6,8 +6,9 @@ import (
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
-	"go.mkw.re/ghidra-panel/pkg/common"
 	"golang.org/x/crypto/argon2"
+
+	"go.mkw.re/ghidra-panel/common"
 )
 
 type DB struct {

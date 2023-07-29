@@ -1,0 +1,27 @@
+{
+  "discord": {
+    "client_id": "xxx",
+    "client_secret": "xxx"
+  },
+  "base_url": "http://localhost:8080",
+  "ghidra": {
+    "endpoint": {
+      "hostname": "ghidra.mkw.re",
+      "port": 13100
+    }
+  },
+  "links": [
+    {
+      "name": "Source Code",
+      "url": "https://github.com/mkw-re/ghidra-panel"
+    },
+    {
+      "name": "Privacy Policy",
+      "url": "https://mkw.re/privacy"
+    },
+    {
+      "name": "DMCA",
+      "url": "https://mkw.re/dmca"
+    }
+  ]
+}

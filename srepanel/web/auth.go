@@ -1,9 +1,10 @@
 package web
 
 import (
-	"go.mkw.re/ghidra-panel/pkg/common"
 	"log"
 	"net/http"
+
+	"go.mkw.re/ghidra-panel/common"
 )
 
 func (s *Server) handleLogin(wr http.ResponseWriter, req *http.Request) {

@@ -8,9 +8,10 @@ import (
 	"encoding/base64"
 	"encoding/binary"
 	"fmt"
-	"go.mkw.re/ghidra-panel/pkg/bitring"
 	"strings"
 	"time"
+
+	"go.mkw.re/ghidra-panel/bitring"
 )
 
 const csrfValidity = 30 * time.Second

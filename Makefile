@@ -1,21 +1,19 @@
-GO?=go
-
-GO_SOURCES:=$(shell find . -name '*.go')
-
 .PHONY: build
-build: srepanel
+build:
+	$(MAKE) -C srepanel build
 
-srepanel: $(GO_SOURCES) go.mod go.sum
-	$(GO) build -o $@ ./cmd/srepanel
+.PHONY: dev
+dev: build
+	srepanel/srepanel -config test_config.json
 
 .PHONY: jaas
 jaas:
 	$(MAKE) -C jaas build
 
-test.db: srepanel
+test.db: build
 	rm -f test.db
-	./srepanel -db $@ -init
-	./srepanel set-password -db $@ -user-id 42 -user richard -pass richard
+	srepanel/srepanel -db $@ -init
+	srepanel/srepanel set-password -db $@ -user-id 42 -user richard -pass richard
 
 .ONESHELL:
 .PHONY: integration
@@ -24,5 +22,6 @@ integration:
 
 clean:
 	$(MAKE) -C jaas clean
+	$(MAKE) -C srepanel clean
 	#rm -f ghidra_panel.secrets.json
-	rm -f srepanel test.db
+	rm -f test.db

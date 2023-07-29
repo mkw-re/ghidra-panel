@@ -4,13 +4,14 @@ import (
 	"context"
 	"encoding/json"
 	"flag"
-	"go.mkw.re/ghidra-panel/pkg/database"
-	"go.mkw.re/ghidra-panel/pkg/discord_auth"
-	"go.mkw.re/ghidra-panel/pkg/token"
-	"go.mkw.re/ghidra-panel/pkg/web"
 	"log"
 	"net/http"
 	"os"
+
+	"go.mkw.re/ghidra-panel/database"
+	"go.mkw.re/ghidra-panel/discord_auth"
+	"go.mkw.re/ghidra-panel/token"
+	"go.mkw.re/ghidra-panel/web"
 )
 
 func main() {
