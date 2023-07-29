@@ -96,6 +96,7 @@ func main() {
 	mux := http.NewServeMux()
 	server.RegisterRoutes(mux)
 
+	log.Printf("Listening on %s", *listen)
 	log.Fatal(http.ListenAndServe(*listen, mux))
 }
 
