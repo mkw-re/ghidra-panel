@@ -2,10 +2,12 @@ package database
 
 import (
 	"context"
+	"crypto/rand"
 	"database/sql"
 	"fmt"
 	_ "github.com/mattn/go-sqlite3"
 	"go.mkw.re/ghidra-panel/pkg/common"
+	"golang.org/x/crypto/argon2"
 )
 
 type DB struct {
@@ -40,4 +42,26 @@ func (d *DB) HasPassword(ctx context.Context, id uint64) (exist bool, err error)
 		QueryRowContext(ctx, "SELECT EXISTS(SELECT 1 FROM passwords WHERE id = ?)", id).
 		Scan(&exist)
 	return
+}
+
+func (d *DB) SetPassword(ctx context.Context, id uint64, password string) error {
+	var salt [16]byte
+	if _, err := rand.Read(salt[:]); err != nil {
+		return err
+	}
+
+	// Hash password with Argon2id
+	hash := argon2.IDKey([]byte(password), salt[:], 1, 19456, 2, 32)
+
+	_, err := d.ExecContext(
+		ctx,
+		`INSERT INTO passwords (id, hash, salt, format) VALUES (?, ?, ?, ?)
+		ON CONFLICT(id) DO UPDATE SET
+			hash = excluded.hash,
+			salt = excluded.salt,
+			format = excluded.format,
+			updated_at = CURRENT_TIMESTAMP`,
+		id, hash, salt[:], 1,
+	)
+	return err
 }
