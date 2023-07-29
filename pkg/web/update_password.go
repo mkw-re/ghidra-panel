@@ -29,5 +29,5 @@ func (s *Server) handleUpdatePassword(wr http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	http.Redirect(wr, req, "/", http.StatusTemporaryRedirect)
+	http.Redirect(wr, req, "/?password_update=success", http.StatusTemporaryRedirect)
 }
