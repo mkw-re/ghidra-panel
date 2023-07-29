@@ -33,13 +33,13 @@ subgraph "Users"
     GhidraClient[Ghidra Client]
     Browser
 end
-    
+
 subgraph "Self Hosted"
     GhidraServer[Ghidra Server]
     JAASPlugin([Panel JAAS Plugin])
     Panel[Panel Server]
     SQLite[(SQLite)]
-    
+
     GhidraServer --> JAASPlugin
     JAASPlugin --> SQLite
     Panel --> SQLite
@@ -53,7 +53,7 @@ Panel --> Discord
 ## Philosophy
 
 This software serves a hobbyist community with limited time.
-As such, it aims to be simple, reproducible, and easy to maintain. 
+As such, it aims to be simple, reproducible, and easy to maintain.
 
 This rules out extensive use of external software, such as libraries,
 database servers, auth servers, etc. Any such software would require
