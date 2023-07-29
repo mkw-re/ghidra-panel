@@ -11,8 +11,13 @@ import (
 	"net/url"
 )
 
-//go:embed templates/*
-var embeds embed.FS
+var (
+	//go:embed templates/*
+	templates embed.FS
+
+	//go:embed assets/*
+	assets embed.FS
+)
 
 var (
 	homePage  *template.Template
@@ -20,7 +25,7 @@ var (
 )
 
 func init() {
-	templates, err := template.ParseFS(embeds, "templates/*.gohtml")
+	templates, err := template.ParseFS(templates, "templates/*.gohtml")
 	if err != nil {
 		panic(err)
 	}
@@ -53,9 +58,17 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/", s.handleHome)
 	mux.HandleFunc("/login", s.handleLogin)
 	mux.HandleFunc("/redirect", s.handleOAuthRedirect)
+
+	// Create file server for assets
+	mux.Handle("/assets/", http.FileServer(http.FS(assets)))
 }
 
 func (s *Server) handleHome(wr http.ResponseWriter, req *http.Request) {
+	if req.URL.Path != "/" {
+		http.NotFound(wr, req)
+		return
+	}
+
 	ident, ok := s.checkAuth(req)
 	if !ok {
 		http.Redirect(wr, req, "/login", http.StatusTemporaryRedirect)
