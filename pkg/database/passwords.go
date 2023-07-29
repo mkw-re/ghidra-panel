@@ -44,7 +44,7 @@ func (d *DB) HasPassword(ctx context.Context, id uint64) (exist bool, err error)
 	return
 }
 
-func (d *DB) SetPassword(ctx context.Context, id uint64, password string) error {
+func (d *DB) SetPassword(ctx context.Context, id uint64, username, password string) error {
 	var salt [16]byte
 	if _, err := rand.Read(salt[:]); err != nil {
 		return err
@@ -55,13 +55,13 @@ func (d *DB) SetPassword(ctx context.Context, id uint64, password string) error 
 
 	_, err := d.ExecContext(
 		ctx,
-		`INSERT INTO passwords (id, hash, salt, format) VALUES (?, ?, ?, ?)
+		`INSERT INTO passwords (id, username, hash, salt, format) VALUES (?, ?, ?, ?, ?)
 		ON CONFLICT(id) DO UPDATE SET
 			hash = excluded.hash,
 			salt = excluded.salt,
 			format = excluded.format,
 			updated_at = CURRENT_TIMESTAMP`,
-		id, hash, salt[:], 1,
+		id, username, hash, salt[:], 1,
 	)
 	return err
 }

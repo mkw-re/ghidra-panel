@@ -23,7 +23,7 @@ func (s *Server) handleUpdatePassword(wr http.ResponseWriter, req *http.Request)
 	}
 	pass := req.PostForm.Get("password")
 
-	if err := s.DB.SetPassword(req.Context(), ident.ID, pass); err != nil {
+	if err := s.DB.SetPassword(req.Context(), ident.ID, ident.Username, pass); err != nil {
 		log.Print("Failed to update password of user: ", err)
 		http.Error(wr, "Internal server error", http.StatusInternalServerError)
 		return
