@@ -4,7 +4,7 @@ build:
 
 .PHONY: dev
 dev: build
-	srepanel/srepanel -config test_config.json
+	srepanel/srepanel -dev -config test_config.json
 
 .PHONY: jaas
 jaas:

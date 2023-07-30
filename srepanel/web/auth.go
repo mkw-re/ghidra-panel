@@ -25,6 +25,21 @@ func (s *Server) handleLogin(wr http.ResponseWriter, req *http.Request) {
 			panic(err)
 		}
 	case http.MethodPost:
+		if s.Config.Dev {
+			ident := &common.Identity{
+				ID:       1,
+				Username: "testuser",
+			}
+			http.SetCookie(wr, &http.Cookie{
+				Name:     "token",
+				Value:    s.Issuer.Issue(ident),
+				Path:     "/",
+				HttpOnly: true,
+				Secure:   true,
+			})
+			http.Redirect(wr, req, "/", http.StatusTemporaryRedirect)
+			return
+		}
 		authURL := s.Auth.AuthURL()
 		http.Redirect(wr, req, authURL, http.StatusTemporaryRedirect)
 	default:
