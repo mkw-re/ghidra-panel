@@ -1,5 +1,5 @@
 GO?=go
-GO_SOURCES:=$(shell find . -name '*.go')
+GO_SOURCES:=$(shell find . -type f -not -path './srepanel')
 
 .PHONY: build
 build: srepanel

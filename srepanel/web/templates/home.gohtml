@@ -27,6 +27,22 @@
 {{ template "nav.gohtml" . }}
 <main class="container">
   <h1>Hi, {{ .Identity.Username }}!</h1>
+  <div class="grid">
+  <article>
+    <header>
+      <strong>Review Access</strong>
+    </header>
+    {{ if .ACL | len  }}
+    <ul>
+      {{ range $repo := .ACL }}
+      <li>{{ $repo.Repo }}: {{ $repo.Perm }}</li>
+      {{ end }}
+    </ul>
+    {{ else }}
+    <p>Your account does not have any access to Ghidra repositories.</p>
+    <p><strong><a href="mailto:richard@mkw.re">Request Access</a></strong></p>
+    {{ end }}
+  </article>
   <article>
     <header>
       <strong>Update Ghidra Credentials</strong>
@@ -60,6 +76,7 @@
     <p><mark>Your account does not have a Ghidra password. Please set one!</mark></p>
     {{ end }}
   </article>
+  </div>
 </main>
 {{ template "footer.gohtml" . }}
 </body>

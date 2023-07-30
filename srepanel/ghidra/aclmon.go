@@ -22,6 +22,12 @@ type ACLMon struct {
 // Returns reason for context termination as error.
 // TODO upgrade to react to inotify events.
 func (a *ACLMon) Run(ctx context.Context) error {
+	acls, err := a.updateACLs()
+	if err != nil {
+		log.Printf("First ACL update failed: %v", err)
+	}
+	a.ACLs.Store(acls)
+
 	ticker := time.NewTicker(30 * time.Second)
 	defer ticker.Stop()
 	for {
