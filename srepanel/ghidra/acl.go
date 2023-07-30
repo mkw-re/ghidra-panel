@@ -19,6 +19,12 @@ const (
 
 const AnonAllowedStr = "=ANONYMOUS_ALLOWED"
 
+var PermStrs = []string{
+	PermRead:  PermReadStr,
+	PermWrite: PermWriteStr,
+	PermAdmin: PermAdminStr,
+}
+
 // ACL is an in-memory representation of a repo access list.
 type ACL struct {
 	AnonymousAccess bool

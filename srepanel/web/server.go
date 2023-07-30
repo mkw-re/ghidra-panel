@@ -2,13 +2,13 @@ package web
 
 import (
 	"embed"
-	"go.mkw.re/ghidra-panel/ghidra"
 	"html/template"
 	"net/http"
 
 	"go.mkw.re/ghidra-panel/common"
 	"go.mkw.re/ghidra-panel/database"
 	"go.mkw.re/ghidra-panel/discord_auth"
+	"go.mkw.re/ghidra-panel/ghidra"
 	"go.mkw.re/ghidra-panel/token"
 )
 
@@ -37,6 +37,7 @@ func init() {
 type Config struct {
 	GhidraEndpoint *common.GhidraEndpoint
 	Links          []common.Link
+	Dev            bool // developer mode
 }
 
 type Server struct {
@@ -83,6 +84,7 @@ type State struct {
 	Nav       []Nav         // navigation bar
 	Links     []common.Link // footer links
 	Ghidra    *common.GhidraEndpoint
+	ACL       []common.UserRepoAccess
 }
 
 type Nav struct {
@@ -118,7 +120,16 @@ func (s *Server) authenticateState(wr http.ResponseWriter, req *http.Request, st
 		http.Error(wr, "failed to get user state, please contact server admin", http.StatusInternalServerError)
 		return false
 	}
-
 	state.UserState = userState
+
+	acl := s.ACLs.Get().QueryUser(ident.Username)
+	state.ACL = make([]common.UserRepoAccess, len(acl))
+	for i, v := range acl {
+		state.ACL[i] = common.UserRepoAccess{
+			Repo: v.Repo,
+			Perm: ghidra.PermStrs[v.Perm],
+		}
+	}
+
 	return true
 }

@@ -40,6 +40,7 @@ func main() {
 	dbPath := flag.String("db", "ghidra_panel.db", "path to database file")
 	listen := flag.String("listen", ":8080", "listen address")
 	cmdInit := flag.Bool("init", false, "initialize database and exit")
+	dev := flag.Bool("dev", false, "enable development mode")
 
 	flag.Parse()
 
@@ -109,6 +110,7 @@ func main() {
 	webConfig := web.Config{
 		GhidraEndpoint: &cfg.Ghidra.Endpoint,
 		Links:          cfg.Links,
+		Dev:            *dev,
 	}
 	server, err := web.NewServer(&webConfig, db, auth, &issuer, &acls)
 	if err != nil {

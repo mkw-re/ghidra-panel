@@ -18,3 +18,8 @@ type Link struct {
 	Name string `json:"name"`
 	URL  string `json:"url"`
 }
+
+type UserRepoAccess struct {
+	Repo string
+	Perm string
+}
