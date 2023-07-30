@@ -6,13 +6,13 @@ import (
 	"sync/atomic"
 )
 
-// It is depressing that Go does not provide memory fences.
+// It is depressing that Go does not provides memory fences.
 
 // BitRing provides a bitmap spanning a ring buffer.
 type BitRing struct {
-	n    uint64
+	n    atomic.Uint64
 	mask uint64
-	v    []uint64
+	v    []atomic.Uint64
 }
 
 func NewBitRing(sz uint64) BitRing {
@@ -20,13 +20,13 @@ func NewBitRing(sz uint64) BitRing {
 	mask |= 0x3f
 	return BitRing{
 		mask: sz,
-		v:    make([]uint64, (sz+1)/64),
+		v:    make([]atomic.Uint64, (sz+1)/64),
 	}
 }
 
 // fits returns whether index n is within the ring buffer.
 func (r *BitRing) fits(n uint64) bool {
-	return atomic.LoadUint64(&r.n)-n <= r.mask
+	return r.n.Load()-n <= r.mask
 }
 
 func (r *BitRing) Contains(n uint64) (exist, ok bool) {
@@ -34,17 +34,17 @@ func (r *BitRing) Contains(n uint64) (exist, ok bool) {
 		return false, false
 	}
 	idx := n & r.mask
-	return (atomic.LoadUint64(&r.v[idx/64]) & (idx % 64)) != 0, true
+	return (r.v[idx/64].Load() & (idx % 64)) != 0, true
 }
 
 func (r *BitRing) Advance() uint64 {
-	n := atomic.AddUint64(&r.n, 1)
+	n := r.n.Add(1)
 	// clear bit
 	idx := n & r.mask
 	for {
-		vOld := atomic.LoadUint64(&r.v[idx/64])
+		vOld := r.v[idx/64].Load()
 		vNew := vOld &^ (1 << (idx % 64))
-		if atomic.CompareAndSwapUint64(&r.v[idx/64], vOld, vNew) {
+		if r.v[idx/64].CompareAndSwap(vOld, vNew) {
 			break
 		}
 	}
@@ -58,9 +58,9 @@ func (r *BitRing) Insert(n uint64) (exist, ok bool) {
 	idx := n & r.mask
 	var vOld uint64
 	for {
-		vOld = atomic.LoadUint64(&r.v[idx/64])
+		vOld = r.v[idx/64].Load()
 		vNew := vOld | (1 << (idx % 64))
-		if atomic.CompareAndSwapUint64(&r.v[idx/64], vOld, vNew) {
+		if r.v[idx/64].CompareAndSwap(vOld, vNew) {
 			break
 		}
 	}
