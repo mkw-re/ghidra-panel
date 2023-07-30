@@ -8,7 +8,8 @@
     "endpoint": {
       "hostname": "ghidra.mkw.re",
       "port": 13100
-    }
+    },
+    "repo_dir": "/home/ghidra/repositories"
   },
   "links": [
     {

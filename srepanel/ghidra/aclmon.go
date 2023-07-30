@@ -55,6 +55,10 @@ func (a *ACLMon) updateACLs() (*ACLState, error) {
 	return acls, nil
 }
 
+func (a *ACLMon) Get() *ACLState {
+	return a.ACLs.Load()
+}
+
 // DiscoverRepos returns a list of directories suspected to be Ghidra repos.
 func DiscoverRepos(dir string) ([]string, error) {
 	var repos []string
@@ -127,4 +131,11 @@ func (acls *ACLState) Add(repoName string, a *ACL) {
 			Perm: perm,
 		})
 	}
+}
+
+func (acls *ACLState) QueryUser(user string) []UserRepoAccess {
+	if acls == nil {
+		return nil
+	}
+	return acls.UserAccess[user]
 }

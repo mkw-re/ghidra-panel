@@ -2,6 +2,7 @@ package web
 
 import (
 	"embed"
+	"go.mkw.re/ghidra-panel/ghidra"
 	"html/template"
 	"net/http"
 
@@ -43,6 +44,7 @@ type Server struct {
 	DB     *database.DB
 	Auth   *discord_auth.Auth
 	Issuer *token.Issuer
+	ACLs   *ghidra.ACLMon
 }
 
 func NewServer(
@@ -50,12 +52,14 @@ func NewServer(
 	db *database.DB,
 	auth *discord_auth.Auth,
 	issuer *token.Issuer,
+	acls *ghidra.ACLMon,
 ) (*Server, error) {
 	server := &Server{
 		Config: config,
 		DB:     db,
 		Auth:   auth,
 		Issuer: issuer,
+		ACLs:   acls,
 	}
 	return server, nil
 }

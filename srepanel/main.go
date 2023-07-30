@@ -3,10 +3,14 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"flag"
+	"go.mkw.re/ghidra-panel/ghidra"
+	"golang.org/x/sync/errgroup"
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
 
 	"go.mkw.re/ghidra-panel/database"
 	"go.mkw.re/ghidra-panel/discord_auth"
@@ -72,6 +76,24 @@ func main() {
 	}
 	defer db.Close()
 
+	// Setup app context
+
+	ctx := context.Background()
+	ctx, cancel := signal.NotifyContext(ctx, os.Interrupt)
+	defer cancel()
+
+	group, ctx := errgroup.WithContext(ctx)
+
+	// Setup ACL monitor
+
+	acls := ghidra.ACLMon{Dir: cfg.Ghidra.RepoDir}
+	if acls.Dir != "" {
+		group.Go(func() error {
+			log.Printf("Monitoring ACLs at %s", acls.Dir)
+			return acls.Run(ctx)
+		})
+	}
+
 	// Setup web server
 
 	if *cmdInit {
@@ -88,7 +110,7 @@ func main() {
 		GhidraEndpoint: &cfg.Ghidra.Endpoint,
 		Links:          cfg.Links,
 	}
-	server, err := web.NewServer(&webConfig, db, auth, &issuer)
+	server, err := web.NewServer(&webConfig, db, auth, &issuer, &acls)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -97,7 +119,26 @@ func main() {
 	server.RegisterRoutes(mux)
 
 	log.Printf("Listening on %s", *listen)
-	log.Fatal(http.ListenAndServe(*listen, mux))
+
+	httpServer := http.Server{
+		Addr:    *listen,
+		Handler: mux,
+	}
+	go func() {
+		err := httpServer.ListenAndServe()
+		if err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatal(err)
+		}
+	}()
+	group.Go(func() error {
+		<-ctx.Done()
+		return httpServer.Shutdown(ctx)
+	})
+
+	if err := group.Wait(); err != nil {
+		log.Print(err)
+	}
+	log.Print("Graceful shut down")
 }
 
 func setPassword(dbPath string, userID uint64, user, pass string) {
