@@ -125,9 +125,10 @@ func main() {
 	issuer := token.NewIssuer((*[32]byte)(secrets.HMACSecret))
 
 	webConfig := web.Config{
-		GhidraEndpoint: &cfg.Ghidra.Endpoint,
-		Links:          cfg.Links,
-		Dev:            *dev,
+		GhidraEndpoint:    &cfg.Ghidra.Endpoint,
+		Links:             cfg.Links,
+		DiscordWebhookURL: cfg.Discord.WebhookURL,
+		Dev:               *dev,
 	}
 	server, err := web.NewServer(&webConfig, db, auth, &issuer, &acls)
 	if err != nil {

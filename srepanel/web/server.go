@@ -35,9 +35,10 @@ func init() {
 }
 
 type Config struct {
-	GhidraEndpoint *common.GhidraEndpoint
-	Links          []common.Link
-	Dev            bool // developer mode
+	GhidraEndpoint    *common.GhidraEndpoint
+	Links             []common.Link
+	DiscordWebhookURL string
+	Dev               bool // developer mode
 }
 
 type Server struct {
