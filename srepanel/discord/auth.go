@@ -1,4 +1,4 @@
-package discord_auth
+package discord
 
 import (
 	"context"
@@ -98,6 +98,7 @@ func (c *Auth) GetDiscordIdentity(ctx context.Context, token *oauth2.Token) (ide
 		User struct {
 			ID       uint64 `json:"id,string"`
 			Username string `json:"username"`
+			Avatar   string `json:"avatar"`
 		} `json:"user"`
 	}
 	if err := json.NewDecoder(res.Body).Decode(&info); err != nil {
@@ -109,7 +110,8 @@ func (c *Auth) GetDiscordIdentity(ctx context.Context, token *oauth2.Token) (ide
 	}
 
 	return &common.Identity{
-		ID:       info.User.ID,
-		Username: info.User.Username,
+		ID:         info.User.ID,
+		Username:   info.User.Username,
+		AvatarHash: info.User.Avatar,
 	}, nil
 }

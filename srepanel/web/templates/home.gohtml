@@ -40,8 +40,14 @@
     </ul>
     {{ else }}
     <p>Your account does not have any access to Ghidra repositories.</p>
-    <p><strong><a href="mailto:richard@mkw.re">Request Access</a></strong></p>
+    {{ if .UserState.HasPassword }}
+    <form action="/request_access" method="post">
+      <button role="button" type="submit" class="outline">Request Access</button>
+    </form>
+    {{ else }}
+      <p>You cannot request access to Ghidra repositories without setting a password. Please set one to continue!</p>
     {{ end }}
+  {{ end }}
   </article>
   <article>
     <header>

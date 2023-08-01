@@ -1,8 +1,9 @@
 package common
 
 type Identity struct {
-	ID       uint64 `json:"id"`
-	Username string `json:"username"`
+	ID         uint64 `json:"id"`
+	Username   string `json:"username"`
+	AvatarHash string `json:"avatar"`
 }
 
 type GhidraEndpoint struct {
