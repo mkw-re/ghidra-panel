@@ -13,7 +13,7 @@ import (
 	"os/signal"
 
 	"go.mkw.re/ghidra-panel/database"
-	"go.mkw.re/ghidra-panel/discord_auth"
+	"go.mkw.re/ghidra-panel/discord"
 	"go.mkw.re/ghidra-panel/token"
 	"go.mkw.re/ghidra-panel/web"
 )
@@ -120,7 +120,7 @@ func main() {
 
 	redirectURL := cfg.BaseURL + "/redirect"
 
-	auth := discord_auth.NewAuth(cfg.Discord.ClientID, cfg.Discord.ClientSecret, redirectURL)
+	auth := discord.NewAuth(cfg.Discord.ClientID, cfg.Discord.ClientSecret, redirectURL)
 
 	issuer := token.NewIssuer((*[32]byte)(secrets.HMACSecret))
 

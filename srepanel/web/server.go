@@ -7,7 +7,7 @@ import (
 
 	"go.mkw.re/ghidra-panel/common"
 	"go.mkw.re/ghidra-panel/database"
-	"go.mkw.re/ghidra-panel/discord_auth"
+	"go.mkw.re/ghidra-panel/discord"
 	"go.mkw.re/ghidra-panel/ghidra"
 	"go.mkw.re/ghidra-panel/token"
 )
@@ -44,7 +44,7 @@ type Config struct {
 type Server struct {
 	Config *Config
 	DB     *database.DB
-	Auth   *discord_auth.Auth
+	Auth   *discord.Auth
 	Issuer *token.Issuer
 	ACLs   *ghidra.ACLMon
 }
@@ -52,7 +52,7 @@ type Server struct {
 func NewServer(
 	config *Config,
 	db *database.DB,
-	auth *discord_auth.Auth,
+	auth *discord.Auth,
 	issuer *token.Issuer,
 	acls *ghidra.ACLMon,
 ) (*Server, error) {
@@ -73,6 +73,7 @@ func (s *Server) RegisterRoutes(mux *http.ServeMux) {
 	mux.HandleFunc("/logout", s.handleLogout)
 
 	mux.HandleFunc("/update_password", s.handleUpdatePassword)
+	mux.HandleFunc("/request_access", s.handleRequestAccess)
 
 	// Create file server for assets
 	mux.Handle("/assets/", http.FileServer(http.FS(assets)))

@@ -28,9 +28,10 @@ func NewIssuer(secret *[32]byte) Issuer {
 }
 
 type Claims struct {
-	Sub  uint64 `json:"sub,string"`
-	Name string `json:"name"`
-	Iat  int64  `json:"iat"`
+	Sub        uint64 `json:"sub,string"`
+	Name       string `json:"name"`
+	AvatarHash string `json:"avatar"`
+	Iat        int64  `json:"iat"`
 }
 
 func (c *Claims) String() string {
@@ -43,9 +44,10 @@ func (c *Claims) String() string {
 
 func (iss Issuer) Issue(ident *common.Identity) string {
 	claims := &Claims{
-		Sub:  ident.ID,
-		Name: ident.Username,
-		Iat:  time.Now().Unix(),
+		Sub:        ident.ID,
+		Name:       ident.Username,
+		AvatarHash: ident.AvatarHash,
+		Iat:        time.Now().Unix(),
 	}
 	body := jwtPrefix + claims.String()
 	return body + "." + iss.sign(body)
@@ -108,7 +110,8 @@ func (iss Issuer) Verify(jwt string) (ident *common.Identity, ok bool) {
 
 	// Reconstruct identity
 	return &common.Identity{
-		ID:       claims.Sub,
-		Username: claims.Name,
+		ID:         claims.Sub,
+		Username:   claims.Name,
+		AvatarHash: claims.AvatarHash,
 	}, true
 }
