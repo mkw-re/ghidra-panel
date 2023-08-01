@@ -1,7 +1,8 @@
 {
   "discord": {
     "client_id": "xxx",
-    "client_secret": "xxx"
+    "client_secret": "xxx",
+    "webhook_url": "xxx"
   },
   "base_url": "http://localhost:8080",
   "ghidra": {

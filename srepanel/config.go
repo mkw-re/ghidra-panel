@@ -11,6 +11,9 @@ type config struct {
 	Discord struct {
 		ClientID     string `json:"client_id"`
 		ClientSecret string `json:"client_secret"`
+		// TODO allow for more general webhooks
+		// For now, we assume that the webhook is for Discord
+		WebhookURL string `json:"webhook_url"`
 	} `json:"discord"`
 	Ghidra struct {
 		Endpoint common.GhidraEndpoint `json:"endpoint"`
