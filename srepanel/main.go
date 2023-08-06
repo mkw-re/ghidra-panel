@@ -22,6 +22,23 @@ func main() {
 	// cli args
 	if len(os.Args) > 1 {
 		switch os.Args[1] {
+		case "rename":
+			os.Args = os.Args[1:]
+			dbPath := flag.String("db", "ghidra_panel.db", "path to database file")
+			argUserID := flag.Uint64("user-id", 0, "ID of user to rename")
+			argUser := flag.String("user", "", "new username")
+			flag.Parse()
+
+			db, err := database.Open(*dbPath)
+			if err != nil {
+				log.Fatal(err)
+			}
+			defer db.Close()
+
+			if err := db.SetUsername(context.Background(), *argUserID, *argUser); err != nil {
+				log.Fatal(err)
+			}
+			return
 		case "set-password":
 			os.Args = os.Args[1:]
 			dbPath := flag.String("db", "ghidra_panel.db", "path to database file")

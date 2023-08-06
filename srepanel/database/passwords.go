@@ -66,3 +66,12 @@ func (d *DB) SetPassword(ctx context.Context, id uint64, username, password stri
 	)
 	return err
 }
+
+func (d *DB) SetUsername(ctx context.Context, id uint64, username string) error {
+	_, err := d.ExecContext(
+		ctx,
+		`UPDATE passwords SET username = ? WHERE id = ?`,
+		username, id,
+	)
+	return err
+}
